@@ -10,43 +10,42 @@
 # Requirements:
 
 # 1.fastq files in inPATH
-# 2.indexed genome or genome file to be indexed with "bowtie-build <infile> <outfile_handle>"
+# 2.annotated genome for mapping with HISAT2 - not doable on your laptop, but you can run scripts that require tons of memory (160 GB ram for >2 hrs) - or download the already annotated genome from the HISAT2 website, if available
 # 3.fastqc module (check for latest version: fastqc/0.11.5/, retrieved on Sep. 28, 2017)
 # 4.fastx_tools (check for availability on BBC in /share/apps/ - add to $PATH if needed!
 # 5.hisat2 (check for latest version: hisat2, retrieved on Dec. 6, 2017)
 # 6.samtools (check for latest version: samtools/1.3.1/, retrieved on Oct. 19th, 2017)
 # 7.bedtools (check for latest version: BedTools/2.26.0/, retrieved on Oct. 19th, 2017)
-# 8. stringtie (check for latest version: stringtie/1.3.0, retrieved on Nov. 20th, 2017)
-# 9. gffcompare
+# 8.stringtie (check for latest version: stringtie/1.3.0, retrieved on Nov. 20th, 2017)
+# 9.prepDE python script to create the files to be loaded in RStudio later
 
 #===================================================================================================================================================
 # Required modules load here:
 
-module load bowtie2/2.3.1/
 module load fastqc/0.11.5/
 module load samtools/1.3.1/
 module load BedTools/2.26.0/
 module load stringtie/1.3.0/
+module load hisat2
 
 #===================================================================================================================================================
 # Global variables
 
-inPATH="/tempdata3/MCB5430/midterm/midterm/fastq/" # uncomment this for the real (very large) files
-# inPATH="/home/bim16102/midterm/" #used this on 1 mil reads files to test the script
-hg19index="/tempdata3/MCB5430/genomes/hg19/bowtieIndex/hg19"
+inPATH="/archive/MCB5430/final_data/fastq/"
+hg19index="/tempdata3/MCB5430/genomes/hg19/hisat_gencode_tran/hg19_gencode"
 hg19chromInfo="/tempdata3/MCB5430/genomes/hg19/hg19_chromInfo.txt"
 gencode="/tempdata3/MCB5430/annotations/hs/bed/hg19_gencode_ENSG_geneID.bed"
+gencode_GTF="/tempdata3/MCB5430/annotations/hs/GTF/gencode.v19.annotation_pc.gtf"
+
 chr12="/tempdata3/MCB5430/genomes/hg19/fasta/chr12.fa"
 hg19="/tempdata3/MCB5430/genomes/hg19/fasta/hg19.fa"
 TSSbackground="/tempdata3/MCB5430/midterm/midterm/hg19_unique_TSSonly_bkgrnd.txt"
-outPATH="/home/bim16102/final/processed_data/"
-adapter="GATCGGAAGAGCTCGTATGCCGTCTTCTGCTTGAAA"
-summits_highconf=$(find /tempdata3/MCB5430/midterm/midterm/peaks/ -maxdepth 1 -type f)
+outPATH="/tempdata3/MCB5430/Bianca_Final/processed_data/"  #using this folder since there's a size limit for the individual accounts' storage
 fastqfiles=$(find ${inPATH} -maxdepth 1 -type f)
+
 #===================================================================================================================================================
-
 # Generating output directories
-
+mkdir /tempdata3/MCB5430/Bianca_Final/
 mkdir $outPATH
 cd $outPATH
 mkdir ./Qtrimmed_fastq
@@ -58,6 +57,8 @@ mkdir ./hisat_OUT
 	mkdir ./hisat_OUT/bedgraphs
 	
 mkdir ./stringtie_OUT
+
+#====================================================================================================================================================
 
 for file in $fastqfiles
 	do
